@@ -1,9 +1,9 @@
 import 'dotenv/config';
-import * as exercises from './exercises_model.mjs';
+import * as exercises from './exercises_model.js';
 import express from 'express';
 import asyncHandler from 'express-async-handler';
 import { body, check, validationResult } from 'express-validator';
-import { isDateValid } from './validation/date_validation.mjs';
+import { isDateValid } from './validation/date_validation.js';
 
 const PORT = process.env.PORT;
 
