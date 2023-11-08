@@ -11,6 +11,10 @@ const app = express();
 
 app.use(express.json());
 
+app.get('/', (req, res) => {
+    res.send({Message: 'Successfully connected to API.'});
+});
+
 /*  
 *   Create an exercise 
 *   This route handler validates data using express-validator
