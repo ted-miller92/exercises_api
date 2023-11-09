@@ -1,26 +1,40 @@
-import 'dotenv/config';
-import * as exercises from './exercises_model.js';
-import express from 'express';
+import express from "express";
+import mongoose from "mongoose";
 import asyncHandler from 'express-async-handler';
 import { body, check, validationResult } from 'express-validator';
-import { isDateValid } from './validation/date_validation.js';
+import { isDateValid } from './validation/date_validation';
+import "dotenv/config";
 
-const PORT = process.env.PORT;
+import * as exercises from "./models/exercises_model";
 
+const PORT = process.env.PORT
 const app = express();
 
-app.use(express.json());
+mongoose.connect(process.env.MONGODB_CONNECT_STRING!,
+    {dbName: "exercises"}
+);
 
-app.get('/', (req, res) => {
-    res.send({Message: 'Successfully connected to API.'});
+const db = mongoose.connection;
+
+db.once("open", () => {
+    console.log("Successfully connected to MongoDB with Mongoose");
 });
 
-/*  
-*   Create an exercise 
+app.get('/', (req: any, res: any) => {
+    res.status(200).send({Message: "Loud and clear"});
+});
+
+/*  Read/retrieve all
+*   returns JSON array containing entire collection of exercises */
+app.get('/exercises', asyncHandler(async (req, res) => {
+    const result = await exercises.getAllExercises();
+    res.send(result);
+}));
+
+/*  Create an exercise 
 *   This route handler validates data using express-validator
 *   and isDateValid() provided by instructors
-*   All fields are required
-*/
+*   All fields are required */
 app.post('/exercises', [
     check('name', 'Name should be a string').notEmpty().isAlpha('en-US', {ignore: ' '}),
     check('reps', 'Reps should be numeric and greater than 0').notEmpty().isInt({ min:1 }),
@@ -54,19 +68,8 @@ app.post('/exercises', [
         }
 }));
 
-/*
-*   Read/retrieve all
-*   returns JSON array containing entire collection of exercises
-*/
-app.get('/exercises', asyncHandler(async (req, res) => {
-    const result = await exercises.getAllExercises();
-    res.send(result);
-}));
-
-/*
-*   Read/retrieve single exercise, given parameter _id
-*   Sends 404 if not found
-*/
+/*  Read/retrieve single exercise, given parameter _id
+*   Sends 404 if not found */
 app.get('/exercises/:_id', asyncHandler(async (req, res) => {
     const result = await exercises.getOneExercise(req.params._id);
     
@@ -77,11 +80,9 @@ app.get('/exercises/:_id', asyncHandler(async (req, res) => {
     }
 }));
 
-/*
-*   Update exercise, given parameter _id
+/*  Update exercise, given parameter _id
 *   If any fields are invalid, returns 400
-*   If the exercise with the given _id doesn't exist, returns 404
-*/
+*   If the exercise with the given _id doesn't exist, returns 404 */
 app.put('/exercises/:_id', [
     check('name', 'Name should be a string').notEmpty().isAlpha('en-US', {ignore: ' '}),
     check('reps', 'Reps should be numeric and greater than 0').notEmpty().isInt({ min:1 }),
@@ -107,7 +108,7 @@ app.put('/exercises/:_id', [
 
             // send request
             const updates = req.body;
-            const result = await exercises.updateExercise(req.params._id, updates);
+            const result = await exercises.updateExercise(req.params!._id, updates);
             
             // check that resource exists
             if (!result){
@@ -121,10 +122,8 @@ app.put('/exercises/:_id', [
         }
 }));
 
-/*
-*   Delete exercise with given _id
-*   if resource doesn't exist, returns 404
-*/
+/*  Delete exercise with given _id
+*   if resource doesn't exist, returns 404 */
 app.delete('/exercises/:_id', asyncHandler(async (req, res) => {
     const result = await exercises.deleteExercise(req.params._id);
 
@@ -133,11 +132,8 @@ app.delete('/exercises/:_id', asyncHandler(async (req, res) => {
     } else {
         res.status(204).send(result);
     }
-    
-}))
+}));
 
-app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}...`);
+app.listen(3000, () => {    
+    console.log(`Listening on port ${PORT}`);
 });
-
-export default app;

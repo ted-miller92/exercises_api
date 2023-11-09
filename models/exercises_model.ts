@@ -1,23 +1,8 @@
-import mongoose from 'mongoose';
-import 'dotenv/config';
-import { response } from 'express';
-
-mongoose.connect(
-    process.env.MONGODB_CONNECT_STRING,
-    {dbName: 'exercises'},
-    { useNewUrlParser: true }
-);
-
-// Connect to to the database
-const db = mongoose.connection;
-// The open event is called when the database connection successfully opens
-db.once("open", () => {
-    console.log("Successfully connected to MongoDB using Mongoose!");
-});
+import mongoose from "mongoose";
+import "dotenv/config";
 
 // schema
-
-const exerciseSchema = mongoose.Schema({
+const exerciseSchema = new mongoose.Schema({
     name: {type: String, required: true},
     reps: {type: Number, required: true},
     weight: {type: Number, required: true},
@@ -26,11 +11,14 @@ const exerciseSchema = mongoose.Schema({
 });
 
 // Compile model from the Schema
-
 const Exercise = mongoose.model("Exercise", exerciseSchema);
 
 // Create
-const addExercise = async (name, reps, weight, unit, date) => {
+const addExercise = async (name: string, 
+                            reps: number, 
+                            weight: number, 
+                            unit: string, 
+                            date: string) => {
     const exercise = new Exercise({name: name, reps: reps, 
         weight: weight, unit: unit, date: date});
 
@@ -44,19 +32,19 @@ const getAllExercises = async() => {
 }
 
 // Read/Retrieve One
-const getOneExercise = async (id) => {
+const getOneExercise = async (id: string) => {
     const query = Exercise.findById(id);
     return query.exec();
 }
 
 // Update
-const updateExercise = async (id, updates) => {
+const updateExercise = async (id: string, updates: object) => {
     const result = Exercise.findByIdAndUpdate(id, updates, {new: true});
     return result;
 }
 
 // Delete
-const deleteExercise = async (id) => {
+const deleteExercise = async (id: string) => {
     const result = Exercise.findByIdAndDelete(id);
     return result;
 }
