@@ -10,6 +10,9 @@ import * as exercises from "./models/exercises_model";
 const PORT = process.env.PORT
 const app = express();
 
+import cors from "cors";
+app.use(cors());
+
 mongoose.connect(process.env.MONGODB_CONNECT_STRING!,
     {dbName: "exercises"}
 );
@@ -117,6 +120,7 @@ app.put('/exercises/:_id', [
                 res.status(200).send(result);
             }
         } else {
+            console.log(errors);
             // send validation errors
             res.status(400).json({errors: errors.array()});
         }
@@ -134,6 +138,6 @@ app.delete('/exercises/:_id', asyncHandler(async (req, res) => {
     }
 }));
 
-app.listen(3000, () => {    
+app.listen(PORT, () => {    
     console.log(`Listening on port ${PORT}`);
 });
